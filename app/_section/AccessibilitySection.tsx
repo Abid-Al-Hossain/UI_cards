@@ -18,8 +18,7 @@ export default function AccessibilitySection({ state, update }: Props) {
       <Select label="Semantic role" value={state.role} options={[
   "article",
   "region",
-  "group",
-  "presentation"
+  "group"
 ]} onChange={(value) => update("role", value)} />
     </SectionCard>
   );

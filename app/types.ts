@@ -1,5 +1,7 @@
 export type SectionId = "presets" | "basics" | "metadata" | "content" | "media" | "actions" | "layout" | "sizing" | "colors" | "border" | "radius" | "shadow" | "typography" | "hover" | "focus" | "states" | "accessibility";
 
+export type CardRole = "article" | "region" | "group";
+
 export type CardStudioState = {
   title: string;
   eyebrow: string;
@@ -14,7 +16,7 @@ export type CardStudioState = {
   secondaryAction: string;
   id: string;
   ariaLabel: string;
-  role: "article" | "region" | "group" | "presentation";
+  role: CardRole;
   tabIndex: number;
   cardMode: "article" | "metric" | "media" | "commerce" | "profile";
   contentDensity: "compact" | "balanced" | "spacious";
