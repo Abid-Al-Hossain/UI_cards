@@ -2,6 +2,25 @@
 
 import type { CSSProperties } from "react";
 import type { CardStudioState } from "../types";
+import { SYSTEM_FONTS } from "@/components/shared/typography/fontConstants";
+
+function resolveFont(state: { fontBucket: "system" | "google"; googleFontFamily: string; systemFontIdx: number }): string {
+  return state.fontBucket === "google"
+    ? `"${state.googleFontFamily}", sans-serif`
+    : (SYSTEM_FONTS[state.systemFontIdx]?.css ?? "inherit");
+}
+
+function buildShadow(state: { shadowEnabled: boolean; shadowX: number; shadowY: number; shadowBlur: number; shadowSpread: number; shadowColor: string; shadowOpacity: number }): string {
+  if (!state.shadowEnabled) return "none";
+  const hex = Math.round(state.shadowOpacity * 255).toString(16).padStart(2, "0");
+  return `${state.shadowX}px ${state.shadowY}px ${state.shadowBlur}px ${state.shadowSpread}px ${state.shadowColor}${hex}`;
+}
+
+function buildRadius(state: { radiusLinked: boolean; radius: number; radiusTL: number; radiusTR: number; radiusBR: number; radiusBL: number }): string {
+  return state.radiusLinked
+    ? `${state.radius}px`
+    : `${state.radiusTL}px ${state.radiusTR}px ${state.radiusBR}px ${state.radiusBL}px`;
+}
 
 function cardStyle(state: CardStudioState): CSSProperties {
   const forced = state.previewState;
@@ -14,24 +33,29 @@ function cardStyle(state: CardStudioState): CSSProperties {
     minHeight: state.minHeight,
     padding: state.padding,
     gap: state.gap,
-    borderRadius: state.radius,
+    borderRadius: buildRadius(state),
     border: `${state.borderWidth}px solid ${isFocused || state.selected ? state.accent : state.border}`,
     boxShadow: isFocused
-      ? `0 0 0 ${state.focusRing}px ${state.accent}, 0 ${Math.round(state.shadow / 3)}px ${state.shadow}px rgba(0,0,0,.28)`
+      ? `0 0 0 ${state.focusRingWidth}px ${state.focusRingColor}, ${buildShadow(state)}`
       : isHovered
-        ? `0 ${Math.round(state.shadow / 2)}px ${state.shadow + state.hoverLift}px rgba(0,0,0,.36)`
-        : `0 ${Math.round(state.shadow / 3)}px ${state.shadow}px rgba(0,0,0,.28)`,
+        ? `${state.shadowX}px ${state.shadowY + state.hoverLift}px ${state.shadowBlur + 8}px ${state.shadowSpread}px rgba(0,0,0,.36)`
+        : buildShadow(state),
     background: state.background,
     color: state.foreground,
-    fontFamily: state.fontFamily,
+    fontFamily: resolveFont(state),
+    fontStyle: state.fontStyle,
+    textTransform: state.textTransform,
+    textDecoration: state.textDecoration,
+    letterSpacing: `${state.letterSpacing}${state.letterSpacingUnit}`,
+    lineHeight: state.lineHeight,
     opacity: isDisabled ? 0.55 : 1,
     outline: "none",
     transform: isActive
       ? "translateY(1px) scale(0.99)"
-      : isHovered && state.motion
+      : isHovered && state.transitionDuration > 0
         ? `translateY(-${state.hoverLift}px)`
         : "none",
-    transition: state.motion ? "all 180ms ease" : "none",
+    transition: state.transitionDuration > 0 ? "all 180ms ease" : "none",
     cursor: isDisabled ? "not-allowed" : state.interactive ? "pointer" : "default",
     pointerEvents: isDisabled ? "none" : "auto",
   };

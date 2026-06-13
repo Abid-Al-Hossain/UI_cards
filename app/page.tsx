@@ -43,7 +43,7 @@ export default function Page() {
   };
 
   const applyPreset = (preset: StudioPreset) => {
-    setState(preset.state);
+    setState({ ...DEFAULT_CARD_STATE, ...(preset.state as Partial<CardStudioState>) });
     setActivePresetId(preset.id);
     setPreviewResetKey((value) => value + 1);
   };

@@ -37,19 +37,51 @@ export type CardStudioState = {
   gap: number;
   radius: number;
   borderWidth: number;
-  shadow: number;
+  borderStyle: "solid" | "dashed" | "dotted" | "double" | "none";
+  // Typography (full button-parity)
+  fontBucket: "system" | "google";
+  fontSearch: string;
+  systemFontIdx: number;
+  googleFontFamily: string;
+  fontSizeUnit: "px" | "rem";
+  fontStyle: "normal" | "italic";
+  textTransform: "none" | "uppercase" | "lowercase" | "capitalize";
+  textDecoration: "none" | "underline";
+  letterSpacing: number;
+  letterSpacingUnit: "px" | "em";
+  lineHeight: number;
+  // Radius (full corner control)
+  radiusLinked: boolean;
+  radiusTL: number;
+  radiusTR: number;
+  radiusBR: number;
+  radiusBL: number;
+  // Shadow (full control)
+  shadowEnabled: boolean;
+  shadowX: number;
+  shadowY: number;
+  shadowBlur: number;
+  shadowSpread: number;
+  shadowOpacity: number;
+  shadowColor: string;
+  // Focus Ring
+  focusRingEnabled: boolean;
+  focusRingWidth: number;
+  focusRingOffset: number;
+  focusRingColor: string;
+  // Transitions
+  transitionDuration: number;
+  transitionEasing: "ease" | "ease-in" | "ease-out" | "ease-in-out" | "linear";
   background: string;
   foreground: string;
   muted: string;
   accent: string;
   border: string;
-  fontFamily: string;
   titleSize: number;
   bodySize: number;
   fontWeight: number;
   hoverLift: number;
   focusRing: number;
-  motion: boolean;
   previewState: "default" | "hover" | "focus" | "active" | "disabled" | "invalid" | "loading" | "empty";
 };
 
@@ -60,7 +92,7 @@ export type StudioPreset = {
   variant: string;
   size: string;
   tags: string[];
-  state: CardStudioState;
+  state: Partial<CardStudioState> & Record<string, unknown>;
 };
 
 export const SECTIONS: Array<{ id: SectionId; label: string }> = [

@@ -15,7 +15,6 @@ export default function HoverSection({ state, update }: Props) {
     <SectionCard title="Hover" subtitle="Hover behavior that remains native.">
       <Switch label="Interactive card" checked={state.interactive} onChange={(value) => update("interactive", value)} />
       <Slider label="Hover lift" value={state.hoverLift} min={0} max={24} step={1} onChange={(value) => update("hoverLift", value)} />
-      <Switch label="Motion safe transition" checked={state.motion} onChange={(value) => update("motion", value)} />
     </SectionCard>
   );
 }
