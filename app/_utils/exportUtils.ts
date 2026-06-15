@@ -64,7 +64,7 @@ function getPills() {
 function getShadow(isHovered, isFocused) {
   const baseShadow = "0 " + Math.round(CONFIG.shadow / 3) + "px " + CONFIG.shadow + "px rgba(0,0,0,.28)";
   if (isFocused) {
-    return "0 0 0 " + CONFIG.focusRing + "px " + CONFIG.accent + ", " + baseShadow;
+    return "0 0 0 " + CONFIG.focusRingWidth + "px " + CONFIG.focusRingColor + ", " + baseShadow;
   }
   if (isHovered) {
     return "0 " + Math.round(CONFIG.shadow / 2) + "px " + (CONFIG.shadow + CONFIG.hoverLift) + "px rgba(0,0,0,.36)";
@@ -79,9 +79,9 @@ function getCardStyle(isHovered, isFocused, isActive, isDisabled) {
     padding: CONFIG.padding,
     gap: CONFIG.gap,
     borderRadius: CONFIG.radius,
-    border: CONFIG.borderWidth + "px solid " + (isFocused || CONFIG.selected ? CONFIG.accent : CONFIG.border),
+    border: CONFIG.borderWidth + "px " + CONFIG.borderStyle + " " + (CONFIG.selected ? CONFIG.selectedBorder : isFocused ? CONFIG.hoverBorderColor : CONFIG.border),
     boxShadow: getShadow(isHovered, isFocused),
-    background: CONFIG.background,
+    background: CONFIG.selected ? CONFIG.selectedBg : isHovered ? CONFIG.hoverBg : CONFIG.background,
     color: CONFIG.foreground,
     fontFamily: CONFIG.fontFamily,
     opacity: isDisabled ? 0.55 : 1,
@@ -95,15 +95,18 @@ function getCardStyle(isHovered, isFocused, isActive, isDisabled) {
 
 function Media() {
   if (!CONFIG.showMedia) return null;
+  const isBackground = CONFIG.mediaPlacement === "background";
 
   return (
     <div
       className="uif-card-media"
       data-anatomy="media"
       style={{
+        position: "relative",
         borderColor: CONFIG.border,
-        borderRadius: Math.max(12, CONFIG.radius - 8),
-        minHeight: CONFIG.mediaPlacement === "background" ? "100%" : undefined,
+        borderRadius: CONFIG.mediaRadius,
+        background: CONFIG.mediaBg,
+        minHeight: isBackground ? "100%" : undefined,
       }}
     >
       <div
@@ -112,9 +115,11 @@ function Media() {
         aria-label={CONFIG.mediaAlt}
         style={{
           backgroundImage: "url(" + CONFIG.mediaUrl + ")",
-          minHeight: CONFIG.mediaPlacement === "background" ? Math.max(120, CONFIG.minHeight - CONFIG.padding * 2) : 144,
+          aspectRatio: isBackground ? undefined : CONFIG.mediaAspectRatio,
+          minHeight: isBackground ? Math.max(120, CONFIG.minHeight - CONFIG.padding * 2) : undefined,
         }}
       />
+      {isBackground ? <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: CONFIG.overlayBg, opacity: CONFIG.overlayOpacity }} /> : null}
     </div>
   );
 }
@@ -125,11 +130,11 @@ function CardBody({ isDisabled, onPrimaryAction, onSecondaryAction }) {
   return (
     <div className="uif-card-body" data-anatomy="content" style={{ gap: CONFIG.gap }}>
       <div className="uif-card-header" data-anatomy="header">
-        <span className="uif-card-eyebrow" style={{ color: CONFIG.muted }}>
+        <span className="uif-card-eyebrow" style={{ color: CONFIG.eyebrowColor, fontSize: CONFIG.eyebrowSize, fontWeight: CONFIG.eyebrowWeight, textTransform: CONFIG.eyebrowTransform }}>
           {CONFIG.eyebrow}
         </span>
         {CONFIG.showBadge ? (
-          <span className="uif-card-badge" data-anatomy="badge" style={{ background: CONFIG.accent, color: "#020617" }}>
+          <span className="uif-card-badge" data-anatomy="badge" style={{ background: CONFIG.badgeBg, color: CONFIG.badgeText }}>
             {CONFIG.badgeLabel}
           </span>
         ) : null}
@@ -148,7 +153,8 @@ function CardBody({ isDisabled, onPrimaryAction, onSecondaryAction }) {
         className="uif-card-stat"
         data-anatomy="stat"
         style={{
-          borderColor: CONFIG.border,
+          borderColor: CONFIG.statBorder,
+          background: CONFIG.statBg,
           borderRadius: Math.max(12, CONFIG.radius - 8),
           padding: Math.max(12, Math.round(CONFIG.padding * 0.65)),
         }}
@@ -159,7 +165,7 @@ function CardBody({ isDisabled, onPrimaryAction, onSecondaryAction }) {
 
       <div className="uif-card-pills" data-anatomy="pills">
         {pills.map((pill) => (
-          <span key={pill} className="uif-card-pill" style={{ borderColor: CONFIG.border, color: CONFIG.accent }}>
+          <span key={pill} className="uif-card-pill" style={{ borderColor: CONFIG.pillBorder, color: CONFIG.pillColor }}>
             {pill}
           </span>
         ))}
@@ -172,7 +178,7 @@ function CardBody({ isDisabled, onPrimaryAction, onSecondaryAction }) {
             className="uif-card-button"
             disabled={isDisabled}
             onClick={onPrimaryAction}
-            style={{ background: CONFIG.accent, color: "#020617" }}
+            style={{ background: CONFIG.actionBg, color: CONFIG.actionText }}
           >
             {CONFIG.primaryAction}
           </button>
@@ -181,7 +187,7 @@ function CardBody({ isDisabled, onPrimaryAction, onSecondaryAction }) {
             className="uif-card-button uif-card-secondary"
             disabled={isDisabled}
             onClick={onSecondaryAction}
-            style={{ borderColor: CONFIG.border, color: CONFIG.foreground }}
+            style={{ background: CONFIG.secondaryBg, borderColor: CONFIG.border, color: CONFIG.foreground }}
           >
             {CONFIG.secondaryAction}
           </button>
@@ -189,7 +195,7 @@ function CardBody({ isDisabled, onPrimaryAction, onSecondaryAction }) {
       ) : null}
 
       {CONFIG.showFooter ? (
-        <p className="uif-card-footer" data-anatomy="footer" style={{ color: CONFIG.muted }}>
+        <p className="uif-card-footer" data-anatomy="footer" style={{ color: CONFIG.footerColor }}>
           {CONFIG.footerText}
         </p>
       ) : null}
@@ -214,6 +220,15 @@ export default function CardComponent({
   const rootClassName = ["uif-card", className].filter(Boolean).join(" ");
   const rootRole = CONFIG.role === "article" ? undefined : CONFIG.role;
   const tabIndex = CONFIG.interactive && !isDisabled ? CONFIG.tabIndex : undefined;
+  const isLoading = forcedState === "loading";
+  const ribbonPos = CONFIG.ribbonPosition === "top-left" ? { top: 12, left: 12 } : CONFIG.ribbonPosition === "bottom-left" ? { bottom: 12, left: 12 } : CONFIG.ribbonPosition === "bottom-right" ? { bottom: 12, right: 12 } : { top: 12, right: 12 };
+  const skeleton = (
+    <div style={{ display: "grid", gap: 12 }} aria-hidden="true">
+      {[60, 90, 75, 40].map((w, i) => (
+        <div key={i} style={{ height: 16, width: w + "%", borderRadius: 999, background: "linear-gradient(90deg, " + CONFIG.skeletonBg + ", " + CONFIG.skeletonHighlight + ", " + CONFIG.skeletonBg + ")" }} />
+      ))}
+    </div>
+  );
   const body = (
     <CardBody
       isDisabled={isDisabled}
@@ -258,8 +273,9 @@ export default function CardComponent({
           setActive(false);
         }}
       >
-        {CONFIG.mediaPlacement === "background" ? (
-          <div className="uif-card-body" style={{ gap: CONFIG.gap }}>
+        {CONFIG.ribbonEnabled ? <span style={{ position: "absolute", zIndex: 10, borderRadius: 999, padding: "4px 10px", fontSize: 12, fontWeight: 700, background: CONFIG.ribbonBg, color: CONFIG.ribbonText, ...ribbonPos }}>{CONFIG.ribbonLabel}</span> : null}
+        {isLoading && CONFIG.skeletonEnabled ? skeleton : CONFIG.mediaPlacement === "background" ? (
+          <div className="uif-card-body" style={{ gap: CONFIG.gap, color: CONFIG.overlayTextColor }}>
             <Media />
             {body}
           </div>

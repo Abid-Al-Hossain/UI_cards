@@ -1,4 +1,4 @@
-export type SectionId = "presets" | "basics" | "metadata" | "content" | "media" | "actions" | "layout" | "sizing" | "colors" | "border" | "radius" | "shadow" | "typography" | "hover" | "focus" | "states" | "accessibility";
+export type SectionId = "presets" | "basics" | "metadata" | "content" | "media" | "actions" | "layout" | "sizing" | "colors" | "border" | "radius" | "shadow" | "typography" | "hover" | "focus" | "states" | "disabled" | "accessibility";
 
 export type CardRole = "article" | "region" | "group";
 
@@ -29,6 +29,12 @@ export type CardStudioState = {
   selectable: boolean;
   selected: boolean;
   disabled: boolean;
+  disabledOpacity: number;
+  disabledCursor: "not-allowed" | "default" | "pointer";
+  disabledUseCustomColors: boolean;
+  disabledBg: string;
+  disabledText: string;
+  disabledBorder: string;
   interactive: boolean;
   itemCount: number;
   width: number;
@@ -77,12 +83,51 @@ export type CardStudioState = {
   muted: string;
   accent: string;
   border: string;
+  eyebrowColor: string;
+  badgeBg: string;
+  badgeText: string;
+  pillBorder: string;
+  pillColor: string;
+  statBorder: string;
+  actionBg: string;
+  actionText: string;
+  footerColor: string;
+  hoverBorderColor: string;
   titleSize: number;
   bodySize: number;
   fontWeight: number;
   hoverLift: number;
   focusRing: number;
   previewState: "default" | "hover" | "focus" | "active" | "disabled" | "invalid" | "loading" | "empty";
+  // Hover & selected
+  hoverBg: string;
+  selectedBg: string;
+  selectedBorder: string;
+  // Media
+  mediaBg: string;
+  mediaRadius: number;
+  mediaAspectRatio: "16/9" | "4/3" | "1/1" | "3/2";
+  // Background-media overlay
+  overlayBg: string;
+  overlayOpacity: number;
+  overlayTextColor: string;
+  // Eyebrow typography
+  eyebrowSize: number;
+  eyebrowWeight: number;
+  eyebrowTransform: "none" | "uppercase" | "lowercase";
+  // Ribbon
+  ribbonEnabled: boolean;
+  ribbonBg: string;
+  ribbonText: string;
+  ribbonLabel: string;
+  ribbonPosition: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  // Skeleton (loading)
+  skeletonEnabled: boolean;
+  skeletonBg: string;
+  skeletonHighlight: string;
+  // Stat & secondary action
+  statBg: string;
+  secondaryBg: string;
 };
 
 export type StudioPreset = {
@@ -159,6 +204,10 @@ export const SECTIONS: Array<{ id: SectionId; label: string }> = [
   {
     "id": "states",
     "label": "State Preview"
+  },
+  {
+    "id": "disabled",
+    "label": "Disabled"
   },
   {
     "id": "accessibility",

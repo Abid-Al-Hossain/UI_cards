@@ -34,13 +34,13 @@ function cardStyle(state: CardStudioState): CSSProperties {
     padding: state.padding,
     gap: state.gap,
     borderRadius: buildRadius(state),
-    border: `${state.borderWidth}px solid ${isFocused || state.selected ? state.accent : state.border}`,
+    border: `${state.borderWidth}px solid ${state.selected ? state.selectedBorder : isFocused ? state.hoverBorderColor : state.border}`,
     boxShadow: isFocused
       ? `0 0 0 ${state.focusRingWidth}px ${state.focusRingColor}, ${buildShadow(state)}`
       : isHovered
         ? `${state.shadowX}px ${state.shadowY + state.hoverLift}px ${state.shadowBlur + 8}px ${state.shadowSpread}px rgba(0,0,0,.36)`
         : buildShadow(state),
-    background: state.background,
+    background: state.disabled && state.disabledUseCustomColors ? state.disabledBg : state.selected ? state.selectedBg : isHovered ? state.hoverBg : state.background,
     color: state.foreground,
     fontFamily: resolveFont(state),
     fontStyle: state.fontStyle,
@@ -64,16 +64,19 @@ function cardStyle(state: CardStudioState): CSSProperties {
 function mediaStyle(state: CardStudioState): CSSProperties {
   return {
     borderColor: state.border,
+    borderRadius: state.mediaRadius,
+    background: state.mediaBg,
     minHeight: state.mediaPlacement === "background" ? "100%" : undefined,
   };
 }
 
 function mediaNode(state: CardStudioState) {
   if (!state.showMedia) return null;
+  const isBackground = state.mediaPlacement === "background";
 
   return (
     <div
-      className="overflow-hidden rounded-2xl border"
+      className="relative overflow-hidden border"
       data-audit="card-media"
       data-testid="card-media"
       style={mediaStyle(state)}
@@ -81,12 +84,16 @@ function mediaNode(state: CardStudioState) {
       <div
         role="img"
         aria-label={state.mediaAlt}
-        className="h-36 w-full bg-cover bg-center"
+        className="w-full bg-cover bg-center"
         style={{
           backgroundImage: `url(${state.mediaUrl})`,
-          minHeight: state.mediaPlacement === "background" ? state.minHeight - state.padding * 2 : undefined,
+          aspectRatio: isBackground ? undefined : state.mediaAspectRatio,
+          minHeight: isBackground ? state.minHeight - state.padding * 2 : undefined,
         }}
       />
+      {isBackground ? (
+        <div className="absolute inset-0 grid content-end p-4" style={{ background: state.overlayBg, opacity: state.overlayOpacity }} aria-hidden="true" />
+      ) : null}
     </div>
   );
 }
@@ -97,19 +104,19 @@ export default function LivePreview({ state }: { state: CardStudioState }) {
   const content = (
     <div className="grid gap-3" data-audit="card-content" data-testid="card-content">
       <div className="flex items-center justify-between gap-3" data-audit="card-header">
-        <span className="text-xs uppercase tracking-[0.18em]" style={{ color: state.muted }}>{state.eyebrow}</span>
-        {state.showBadge && <span className="rounded-full px-3 py-1 text-xs font-bold" data-audit="card-badge" data-testid="card-badge" style={{ background: state.accent, color: "#020617" }}>{state.badgeLabel}</span>}
+        <span className="tracking-[0.18em]" style={{ color: state.eyebrowColor, fontSize: state.eyebrowSize, fontWeight: state.eyebrowWeight, textTransform: state.eyebrowTransform }}>{state.eyebrow}</span>
+        {state.showBadge && <span className="rounded-full px-3 py-1 text-xs font-bold" data-audit="card-badge" data-testid="card-badge" style={{ background: state.badgeBg, color: state.badgeText }}>{state.badgeLabel}</span>}
       </div>
       <div data-audit="card-copy">
         <h3 style={{ fontSize: state.titleSize, fontWeight: state.fontWeight }}>{state.title}</h3>
         <p style={{ color: state.muted, fontSize: state.bodySize }}>{state.description}</p>
       </div>
-      <div className="rounded-2xl border p-4" data-audit="card-stat" data-testid="card-stat" style={{ borderColor: state.border }}>
+      <div className="rounded-2xl border p-4" data-audit="card-stat" data-testid="card-stat" style={{ borderColor: state.statBorder, background: state.statBg }}>
         <strong style={{ fontSize: state.titleSize }}>{state.statValue}</strong>
         <p style={{ color: state.muted }}>{state.statLabel}</p>
       </div>
       <div className="flex flex-wrap gap-2" data-audit="card-pills" data-testid="card-pills">
-        {pills.map((pill) => <span key={pill} className="rounded-full border px-3 py-1 text-xs" style={{ borderColor: state.border, color: state.accent }}>{pill}</span>)}
+        {pills.map((pill) => <span key={pill} className="rounded-full border px-3 py-1 text-xs" style={{ borderColor: state.pillBorder, color: state.pillColor }}>{pill}</span>)}
       </div>
       {state.showActions && (
         <div
@@ -117,30 +124,44 @@ export default function LivePreview({ state }: { state: CardStudioState }) {
           data-audit="card-actions"
           data-testid="card-actions"
         >
-          <button type="button" disabled={state.disabled || state.previewState === "disabled"} className="rounded-xl px-4 py-2 text-sm font-bold disabled:cursor-not-allowed" style={{ background: state.accent, color: "#020617" }}>{state.primaryAction}</button>
-          <button type="button" disabled={state.disabled || state.previewState === "disabled"} className="rounded-xl border px-4 py-2 text-sm font-bold disabled:cursor-not-allowed" style={{ borderColor: state.border, color: state.foreground }}>{state.secondaryAction}</button>
+          <button type="button" disabled={state.disabled || state.previewState === "disabled"} className="rounded-xl px-4 py-2 text-sm font-bold disabled:cursor-not-allowed" style={{ background: state.actionBg, color: state.actionText }}>{state.primaryAction}</button>
+          <button type="button" disabled={state.disabled || state.previewState === "disabled"} className="rounded-xl border px-4 py-2 text-sm font-bold disabled:cursor-not-allowed" style={{ background: state.secondaryBg, borderColor: state.border, color: state.foreground }}>{state.secondaryAction}</button>
         </div>
       )}
-      {state.showFooter && <p className="text-xs" data-audit="card-footer" data-testid="card-footer" style={{ color: state.muted }}>{state.footerText}</p>}
+      {state.showFooter && <p className="text-xs" data-audit="card-footer" data-testid="card-footer" style={{ color: state.footerColor }}>{state.footerText}</p>}
     </div>
   );
   const isSplitMedia = state.showMedia && (state.mediaPlacement === "left" || state.mediaPlacement === "right");
+  const isLoading = state.previewState === "loading";
+  const ribbonPos: CSSProperties = state.ribbonPosition === "top-left" ? { top: 12, left: 12 } : state.ribbonPosition === "bottom-left" ? { bottom: 12, left: 12 } : state.ribbonPosition === "bottom-right" ? { bottom: 12, right: 12 } : { top: 12, right: 12 };
+
+  const skeleton = (
+    <div className="grid gap-3" aria-hidden="true">
+      {[60, 90, 75, 40].map((w, i) => (
+        <div key={i} className="h-4 rounded-full" style={{ width: `${w}%`, background: `linear-gradient(90deg, ${state.skeletonBg}, ${state.skeletonHighlight}, ${state.skeletonBg})` }} />
+      ))}
+    </div>
+  );
 
   return (
     <article
       id={state.id}
       role={state.role === "article" ? undefined : state.role}
       aria-label={state.ariaLabel}
+      aria-busy={isLoading || undefined}
       aria-disabled={state.disabled || state.previewState === "disabled" ? true : undefined}
       tabIndex={state.interactive && !(state.disabled || state.previewState === "disabled") ? state.tabIndex : undefined}
       data-audit="live-preview-card"
       data-testid="live-preview-card"
       data-selected={state.selectable ? String(state.selected) : undefined}
-      style={cardStyle(state)}
+      style={{ ...cardStyle(state), position: "relative" }}
       className={isSplitMedia ? "grid grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)]" : "grid"}
     >
-      {state.mediaPlacement === "background" ? (
-        <div className="grid gap-4">
+      {state.ribbonEnabled ? (
+        <span className="absolute z-10 rounded-full px-2.5 py-1 text-xs font-bold" style={{ ...ribbonPos, background: state.ribbonBg, color: state.ribbonText }}>{state.ribbonLabel}</span>
+      ) : null}
+      {isLoading && state.skeletonEnabled ? skeleton : state.mediaPlacement === "background" ? (
+        <div className="grid gap-4" style={{ color: state.overlayTextColor }}>
           {media}
           {content}
         </div>

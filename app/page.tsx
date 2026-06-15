@@ -25,6 +25,7 @@ import TypographySection from "./_section/TypographySection";
 import HoverSection from "./_section/HoverSection";
 import FocusSection from "./_section/FocusSection";
 import StatesSection from "./_section/StatesSection";
+import DisabledSection from "./_section/DisabledSection";
 import AccessibilitySection from "./_section/AccessibilitySection";
 import { SECTIONS, type SectionId, type CardStudioState, type StudioPreset } from "./types";
 
@@ -70,7 +71,7 @@ export default function Page() {
       {activeSection === "hover" && <HoverSection state={state} update={update} />}
       {activeSection === "focus" && <FocusSection state={state} update={update} />}
       {activeSection === "states" && <StatesSection state={state} update={update} />}
-      {activeSection === "accessibility" && <AccessibilitySection state={state} update={update} />}
+      {activeSection === "disabled" && <DisabledSection state={state} update={update} />}{activeSection === "accessibility" && <AccessibilitySection state={state} update={update} />}
     </>
   );
 
