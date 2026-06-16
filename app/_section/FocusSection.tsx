@@ -13,9 +13,11 @@ type Props = {
 export default function FocusSection({ state, update }: Props) {
   return (
     <SectionCard title="Focus" subtitle="Focus and selected-state affordances.">
+      <div className="space-y-4">
       <Slider label="Focus ring" value={state.focusRing} min={0} max={8} step={1} onChange={(value) => update("focusRing", value)} />
       <Switch label="Selectable" checked={state.selectable} onChange={(value) => update("selectable", value)} />
       <Switch label="Selected state" checked={state.selected} onChange={(value) => update("selected", value)} />
+    </div>
     </SectionCard>
   );
 }

@@ -13,10 +13,12 @@ type Props = {
 export default function ContentSection({ state, update }: Props) {
   return (
     <SectionCard title="Content" subtitle="Text, labels, and visible content structure.">
+      <div className="space-y-4">
       <Input label="Description" value={state.description} onChange={(value) => update("description", value)} />
       <Input label="Stat label" value={state.statLabel} onChange={(value) => update("statLabel", value)} />
       <Input label="Footer text" value={state.footerText} onChange={(value) => update("footerText", value)} />
       <Slider label="Metadata pills" value={state.itemCount} min={1} max={6} step={1} onChange={(value) => update("itemCount", value)} />
+    </div>
     </SectionCard>
   );
 }

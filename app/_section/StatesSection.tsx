@@ -13,6 +13,7 @@ type Props = {
 export default function StatesSection({ state, update }: Props) {
   return (
     <SectionCard title="State Preview" subtitle="Forced preview states for QA.">
+      <div className="space-y-4">
       <Select label="Preview state" value={state.previewState} options={[
   "default",
   "hover",
@@ -26,6 +27,7 @@ export default function StatesSection({ state, update }: Props) {
       <Switch label="Disabled" checked={state.disabled} onChange={(value) => update("disabled", value)} />
       <Switch label="Show badge" checked={state.showBadge} onChange={(value) => update("showBadge", value)} />
       <Switch label="Show footer" checked={state.showFooter} onChange={(value) => update("showFooter", value)} />
+    </div>
     </SectionCard>
   );
 }

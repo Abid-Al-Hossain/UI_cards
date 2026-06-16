@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import AppShell from "@/components/shared/layout/AppShell";
 import { PlaygroundLayout } from "@/components/shared/layout/PlaygroundLayout";
+import { useHistoryState } from "@/components/hooks/useHistoryState";
+import UndoRedoButtons from "@/components/shared/layout/UndoRedoButtons";
 import SectionSelector from "@/components/shared/layout/SectionSelector";
 import { SharedPreviewDownloadPanel } from "@/components/shared/layout/SharedPreviewDownloadPanel";
 import type { PreviewCanvasMode } from "@/components/shared/layout/PreviewPanel";
@@ -30,7 +32,7 @@ import AccessibilitySection from "./_section/AccessibilitySection";
 import { SECTIONS, type SectionId, type CardStudioState, type StudioPreset } from "./types";
 
 export default function Page() {
-  const [state, setState] = useState<CardStudioState>(DEFAULT_CARD_STATE);
+  const { state, set: setState, undo, redo, reset, canUndo, canRedo } = useHistoryState<CardStudioState>(DEFAULT_CARD_STATE);
   const [activeSection, setActiveSection] = useState<SectionId>("presets");
   const [activePresetId, setActivePresetId] = useState<string | null>(null);
   const [downloadName] = useState("cards-component");
@@ -87,9 +89,17 @@ export default function Page() {
     />
   );
 
+  const handleReset = () => {
+    reset();
+    setPreviewResetKey((value) => value + 1);
+  };
+  const headerActions = (
+    <UndoRedoButtons undo={undo} redo={redo} reset={handleReset} canUndo={canUndo} canRedo={canRedo} />
+  );
+
   return (
     <AppShell contentOverflow="hidden">
-      <PlaygroundLayout title="Card Studio" controls={controls} preview={output} />
+      <PlaygroundLayout title="Card Studio" headerActions={headerActions} controls={controls} preview={output} />
     </AppShell>
   );
 }
